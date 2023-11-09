@@ -28,7 +28,7 @@ Start application:
 docker compose up -d
 ```
 
-Open in browser: [Site](localhost:8005/)
+Open in browser: [Site](http://localhost:8005/)
 
 Or write in adress line `localhost:<port>/` where <port> is a value of PORT in .env
 
