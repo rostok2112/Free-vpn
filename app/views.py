@@ -8,7 +8,6 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 
-# TODO: realize django message api on general views
 
 def home(request):
     if request.user.is_authenticated:

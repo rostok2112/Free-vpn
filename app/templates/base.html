@@ -1,0 +1,45 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block content_head %}  
+            <meta charset="utf-8" />
+            <title>{% block title_head %} Login {% endblock %}</title>
+            <link rel="stylesheet" type="text/css" href="{% block default_style_head %} {% static 'admin/css/base.css' %} {% endblock %}">
+            <style>
+                {% block style_head %}
+
+                {% endblock %}
+            </style>
+            <script>
+                {% block script_head %}
+
+                {% endblock %}
+            </script>
+
+            {% block additional_tags_head %}
+
+            {% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block messages_block %}
+            {% if messages %}
+                <ul class="messagelist">
+                    {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endblock %}
+        {% block content_body %}
+
+        {% endblock %}
+        <script>
+            {% block script_body %}
+
+            {% endblock %}
+        </script>
+    </body>
+</html>

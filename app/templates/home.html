@@ -1,2 +1,11 @@
-<div >Hello, {{username}} !</div>
-<a href="{% url 'logout' %}">Log out</a>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title_head%}
+    Home
+{% endblock%}
+
+{% block content_body %}
+    <div >Hello, {{username}} !</div>
+    <a href="{% url 'logout' %}">Log out</a>
+{% endblock%}

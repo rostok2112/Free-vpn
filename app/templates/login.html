@@ -1,12 +1,15 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-<head>
+{% block title_head%}
+    Login
+{% endblock%}
+
+{% block additional_tags_head %}
     <link rel="stylesheet" href="{% static 'auth/css/style.css' %}">
-    <title>Login</title>
-</head>
-<body>
+{% endblock %}
+
+{% block content_body %}
     <div class='wrapper'>
         <div class='form-wrapper'>
             <h2>Login</h2>
@@ -18,5 +21,4 @@
             <p>No account? <a href="{% url 'register' %}">Register here</a>.</p>
         </div>
     </div>
-</body>
-</html>
+{% endblock%}
