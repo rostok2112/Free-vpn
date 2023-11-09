@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+  free_vpn:
+    build: .
+    container_name: free_vpn
+    ports:
+      - "${PORT}:8005"
+    links:
+      - "db:postgres_db"
+    restart: unless-stopped
+    environment:
+      - PORT=${PORT}
+      - DATABASE_URL=${DATABASE_URL:-postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}}
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      - db
+
+volumes:
+  db_data:
