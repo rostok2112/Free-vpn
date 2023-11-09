@@ -29,11 +29,14 @@ a:hover {
 a:active {
     color: blue;
 }
+input {
+    border-radius: 5px;
+}
 
 .wrapper {
     width: 100%;
     height: 100%;
-    background: lightgray;
+    background: lightcyan;
     display: flex;
     justify-content: center; 
     align-items: center; 
