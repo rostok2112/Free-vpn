@@ -14,6 +14,8 @@ sudo usermod -aG docker ${USER}
 su - ${USER}
 ```
 
+Or install Docker desktop for windows: [Installation instruction](https://docs.docker.com/desktop/install/windows-install/)
+
 Copy and paste values of .env.example file to .env file and edit it for your purposes:
 
 ```bash
@@ -31,6 +33,12 @@ docker compose up -d
 Open in browser: [Site](http://localhost:8005/)
 
 Or write in adress line `localhost:<port>/` where <port> is a value of PORT in .env
+
+For creating super user (Account with unlimited rights on admin panel):
+
+```bash
+docker exec -it free_vpn python /code/manage.py  createsuperuser
+```
 
 ## Migrations
 
@@ -74,6 +82,18 @@ Sync migrations:
 
 ```bash
 pipenv run python manage.py migrate
+```
+
+Collect static filest to static/ directory:
+
+```bash
+pipenv run python manage.py  collect static
+```
+
+Create super user (Account with unlimited rights on admin panel):
+
+```bash
+pipenv run python manage.py  createsuperuser
 ```
 
 Run app for development purposes:

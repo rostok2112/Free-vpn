@@ -98,9 +98,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+APPS = [
+    'app',
+]
 
 STATIC_URL = 'static/'
+STATIC_ROOT = Path.joinpath(BASE_DIR, STATIC_URL)
+
+STATICFILES_DIRS = [
+   Path.joinpath(BASE_DIR, app, STATIC_URL) for app in APPS
+]
+
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
