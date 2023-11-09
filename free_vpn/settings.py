@@ -2,20 +2,18 @@ from pathlib import Path
 import environ
 import dj_database_url
 
-env = environ.Env(
 
+env = environ.Env(
     DEBUG=(bool, False)
 )
 
 DEBUG = env.bool('DEBUG', False)
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 SECRET_KEY = env.str('SECRET_KEY', '')
 
 ALLOWED_HOSTS = [
-    '*',
+    '127.0.0.1',
+    'localhost',
 ]
 
 INSTALLED_APPS = [
@@ -25,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app',
 ]
 
 MIDDLEWARE = [
@@ -42,7 +41,9 @@ ROOT_URLCONF = 'free_vpn.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,17 +99,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-APPS = [
-    'app',
-]
-
 STATIC_URL = 'static/'
 STATIC_ROOT = Path.joinpath(BASE_DIR, STATIC_URL)
-
-STATICFILES_DIRS = [
-   Path.joinpath(BASE_DIR, app, STATIC_URL) for app in APPS
-]
-
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
