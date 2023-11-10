@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title_head%}
+    {{auth_action_name}}
+{% endblock%}
+
+{% block additional_tags_head %}
+    <link rel="stylesheet" href="{% static 'auth/css/style.css' %}">
+{% endblock %}
+
+{% block content_body %}
+    <div class='wrapper'>
+        <div class='form-wrapper'>
+            <h2>{{auth_action_name}}</h2>
+            <form method="post" action="{% url auth_form_action %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">{{auth_action_name}}</button>
+            </form>
+            <p>
+                {% block after_form_paragraph %}  
+
+                {% endblock %}
+            </p>
+        </div>
+    </div>
+{% endblock%}

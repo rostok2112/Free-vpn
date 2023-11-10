@@ -1,24 +1,9 @@
-{% extends 'base.html' %}
+
+{% load custom_tags %}
 {% load static %}
 
-{% block title_head%}
-    Login
-{% endblock%}
+{% xextends 'base_auth.html' with auth_action_name='Login' auth_form_action='login' %}
 
-{% block additional_tags_head %}
-    <link rel="stylesheet" href="{% static 'auth/css/style.css' %}">
+{% block after_form_paragraph %}  
+    No account? <a href="{% url 'register' %}">Register here</a>.
 {% endblock %}
-
-{% block content_body %}
-    <div class='wrapper'>
-        <div class='form-wrapper'>
-            <h2>Login</h2>
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Login</button>
-            </form>
-            <p>No account? <a href="{% url 'register' %}">Register here</a>.</p>
-        </div>
-    </div>
-{% endblock%}
