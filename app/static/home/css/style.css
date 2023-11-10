@@ -1,0 +1,43 @@
+body {
+    background-color: lightgray;
+}
+
+.navigator-block {
+    background-color: lightcyan;
+    box-shadow: 0 0 10px 5px rgba(146, 141, 141, 0.8);
+    display: flex;
+    justify-content: end;
+    height:fit-content;
+    padding: 25px;
+    margin-bottom: 25px;
+
+}
+.table-wrapper {
+    margin: 20px;
+    box-sizing: border-box;
+}
+
+
+.table-wrapper table {
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0 0 10px 5px rgba(146, 141, 141, 0.8);
+
+}
+  
+.table-wrapper th, 
+.table-wrapper td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+    text-align: center;
+
+  }
+  
+.table-wrapper th {
+    background-color: #f2f2f2;
+}
+
+.add-site-link {
+    text-align: end;
+    font-weight: bold;
+}

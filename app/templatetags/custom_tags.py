@@ -18,7 +18,7 @@ class XExtendsNode(template.Node):
         finally:
            context.pop()
 
-def do_xextends(parser, token):
+def xextends(parser, token):
     bits = token.contents.split()
     kwargs = {}
     if 'with' in bits:
@@ -44,4 +44,18 @@ def do_xextends(parser, token):
     return xnode
 
 
-register.tag('xextends', do_xextends)
+register.tag('xextends', xextends)
+
+def divide(value, divisor):
+    try:
+        value = float(value)
+        divisor = float(divisor)
+        if divisor != 0:
+            result = value / divisor
+            return result
+        else:
+            return "Division by zero"
+    except (ValueError, TypeError) as e:
+        return e
+
+register.filter('divide', divide)

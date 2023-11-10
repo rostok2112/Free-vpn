@@ -42,9 +42,10 @@ docker exec -it free_vpn python /code/manage.py  createsuperuser
 
 ## Migrations
 
-After any changes in models apply migrations:
+After any changes in models create and apply migrations:
 
 ```bash
+docker exec free_vpn  python manage.py makemigrations
 docker compose up -d --no-deps --build free_vpn
 ```
 
@@ -87,7 +88,7 @@ pipenv run python manage.py migrate
 Collect static filest to static/ directory:
 
 ```bash
-pipenv run python manage.py  collect static
+pipenv run python manage.py  collectstatic
 ```
 
 Create super user (Account with unlimited rights on admin panel):
@@ -102,10 +103,11 @@ Run app for development purposes:
 pipenv run python manage.py runserver 8005
 ```
 
-After any changes in models apply migrations:
+
+After any changes in models create and apply migrations:
 
 ```bash
-python manage.py makemigrations <migration_name>
+pipenv run python manage.py makemigrations
 pipenv run python manage.py migrate
 ```
 

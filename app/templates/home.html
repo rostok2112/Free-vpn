@@ -1,11 +1,45 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 
-{% block title_head%}
+{% block title_head %}
     Home
 {% endblock%}
 
+{% block additional_tags_head %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+{% endblock %}
+
 {% block content_body %}
-    <div >Hello, {{username}} !</div>
-    <a href="{% url 'logout' %}">Log out</a>
+    <div class='navigator-block'>
+        <a href="{% url 'admin:index' %}"> Admin panel </a>
+        &nbsp;|&nbsp;
+        <a href="{% url 'settings' %}">{{username | capfirst }} settings </a>
+        &nbsp;|&nbsp;
+        <a href="{% url 'logout' %}"> Log out </a>
+    </div>
+
+    <div class='table-wrapper'>
+        <p class='add-site-link'><a href={% url 'add_site' %}>Add new site</a></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>Count of visits</th>
+                    <th>Amount of routed data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for site in sites %}
+                    <tr>
+                        <td><a href="{% url 'edit_site' site.id %}">{{ site.name }}</a></td>
+                        <td><a href="{{site.url}}">{{ site.url}}</a></td>
+                        <td>{{site.visit_count}}</td>
+                        <td>{{site.routed_data_amount|divide:1024|floatformat:2 }} KB</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock%}

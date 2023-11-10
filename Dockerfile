@@ -25,8 +25,5 @@ FROM base AS runtime
 COPY --from=deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
 
-# Copy sources
-COPY . /code
-
 # Run the application
 ENTRYPOINT ["/code/run.sh"]

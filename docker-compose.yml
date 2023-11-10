@@ -5,10 +5,11 @@ services:
     image: postgres:latest
     container_name: postgres_db
     ports:
-      - ${DB_PORT}:5432
+      - ${DB_PORT}:${DB_PORT}
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
+      - PGPORT=${DB_PORT}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
       - POSTGRES_DB=${DB_NAME}
@@ -20,6 +21,8 @@ services:
     links:
       - "db:postgres_db"
     restart: unless-stopped
+    volumes:
+      - .:/code
     environment:
       - PORT=${PORT}
       - DATABASE_URL=${DATABASE_URL:-postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}}
