@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import (
     authenticate, 
@@ -8,6 +8,7 @@ from django.contrib.auth import (
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
+from app.forms import SiteForm
 
 from app.models import Site
 
@@ -15,7 +16,6 @@ from app.models import Site
 def home(request):
     if request.user.is_authenticated:
         return render(request, 'home.html', {
-            'username': request.user.username,
             'sites':    request.user.site_set.all()
         })
     else:
@@ -65,8 +65,38 @@ def logout(request):
 def settings(request):
     return HttpResponse("Settings !!!")
 
-def add_site(request):
-    return HttpResponse(f"Add SITE !!!")
+def site_add(request):
+    if request.method == 'POST':
+        form = SiteForm(request.POST, request=request)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You are successfully added new site !")
+            return redirect('home')
+    else:
+        form = SiteForm(request=request)
 
-def edit_site(request, id):
-    return HttpResponse(f"Edit SITE !!! {id}")
+    return render(request, 'site_form.html', {'form': form})
+
+def site_edit(request, id):
+    site = get_object_or_404(Site, pk=id)
+    if request.method == 'POST':
+        form = SiteForm(request.POST, instance=site)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You are successfully edited site !")
+            return redirect('home')
+    else:
+        form = SiteForm(instance=site)
+
+    return render(request, 'site_form.html', {
+        'site': site, 'form': form, 'editing': True
+    })
+
+def site_delete(request, id):
+    site = get_object_or_404(Site, pk=id)
+    # site_name = site.name
+    site.delete()
+    
+    messages.success(request, f"You are successfully deleted site '{site.name}' !")
+    
+    return redirect('home')

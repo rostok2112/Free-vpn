@@ -5,11 +5,11 @@ from app.models import Site
 
 @admin.register(Site)
 class SiteAdmin(admin.ModelAdmin):
-    list_select_related = ('user',)
-    list_links = ('user', 'url')
-    search_fields = ["id", "name", "user__username", ]
-    readonly_fields = ('id',)
-    readonly_after_add = ('user', ) # fields that will be read only on change form
+    list_select_related   = ('user',)
+    list_links            = ('user', 'url')
+    search_fields         = ["id", "name", "user__username", ]
+    readonly_fields       = ('id',)
+    readonly_after_add    = ('user', ) # fields that will be read only on change form
     exclude_from_add_page = ('visit_count', 'routed_data_amount',) # fields that will be excluded from add form 
                                                                    # and readonly on change for
     

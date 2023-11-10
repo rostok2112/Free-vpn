@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_with_navigator.html' %}
 {% load static %}
 {% load custom_tags %}
 
@@ -7,39 +7,38 @@
 {% endblock%}
 
 {% block additional_tags_head %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
 {% endblock %}
 
 {% block content_body %}
-    <div class='navigator-block'>
-        <a href="{% url 'admin:index' %}"> Admin panel </a>
-        &nbsp;|&nbsp;
-        <a href="{% url 'settings' %}">{{username | capfirst }} settings </a>
-        &nbsp;|&nbsp;
-        <a href="{% url 'logout' %}"> Log out </a>
-    </div>
-
+    {{ block.super }}
     <div class='table-wrapper'>
-        <p class='add-site-link'><a href={% url 'add_site' %}>Add new site</a></p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>URL</th>
-                    <th>Count of visits</th>
-                    <th>Amount of routed data</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for site in sites %}
+        {% if  not sites %}
+            <span> No any site added </span>
+        {% endif %}
+        <p class='add-site-link'><a href={% url 'site_add' %}>Add new site</a></p>
+        {% if sites %}
+            <table>
+                <thead>
                     <tr>
-                        <td><a href="{% url 'edit_site' site.id %}">{{ site.name }}</a></td>
-                        <td><a href="{{site.url}}">{{ site.url}}</a></td>
-                        <td>{{site.visit_count}}</td>
-                        <td>{{site.routed_data_amount|divide:1024|floatformat:2 }} KB</td>
+                        <th>Name</th>
+                        <th>URL</th>
+                        <th>Count of visits</th>
+                        <th>Amount of routed data</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for site in sites %}
+                        <tr>
+                            <td><a href="{% url 'site_edit' site.id %}">{{ site.name }}</a></td>
+                            <td><a href="{{site.url}}">{{ site.url}}</a></td>
+                            <td>{{site.visit_count}}</td>
+                            <td>{{site.routed_data_amount|divide:1024|floatformat:2 }} KB</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     </div>
 {% endblock%}

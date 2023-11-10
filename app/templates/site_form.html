@@ -1,0 +1,30 @@
+{% extends 'base_with_navigator.html' %}
+{% load static %}
+
+{% block title_head %}
+    {% if editing %}Edit Site - {{site.name}} {% else %}Add New Site{% endif %} 
+{% endblock%}
+
+
+{% block additional_tags_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'site_form/css/style.css' %}">
+{% endblock %}
+
+{% block content_body %}
+    {{ block.super }}
+    <div class="form-wrapper">
+        <h2>{% if editing %}Edit Site{% else %}Add New Site{% endif %}</h2>
+        <form method="post" action="{% if editing %}{% url 'site_edit' site.id %}{% else %}{% url 'site_add' %}{% endif %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class='form-buttons-block'>
+                <button type="submit">Save</button>
+                {% if editing %}
+                    <a href="{% url 'site_delete' id=form.instance.id %}"><button type="button">Delete</button></a>
+                {% endif %}
+                <a href="{% url 'home' %}"><button type="button">Cancel</button></a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

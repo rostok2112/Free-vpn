@@ -11,6 +11,7 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("logout", views.logout, name="logout"),
     path("settings", views.settings, name="settings"),
-    path("sites/", views.add_site, name='add_site'),
-    path("sites/<str:id>/", views.edit_site, name='edit_site'),
+    path("sites/", views.site_add, name='site_add'),
+    path("sites/<uuid:id>/", views.site_edit, name='site_edit'),
+    path('sites/<uuid:id>/delete/', views.site_delete, name='site_delete'),
 ]
