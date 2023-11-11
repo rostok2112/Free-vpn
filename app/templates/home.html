@@ -13,6 +13,11 @@
 
 {% block content_body %}
     {{ block.super }}
+
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
     <div class='table-wrapper'>
         {% if  not sites %}
             <span> No any site added </span>
@@ -26,6 +31,7 @@
                         <th>URL</th>
                         <th>Count of visits</th>
                         <th>Amount of routed data</th>
+                        <th>Use the proxy</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,10 +41,18 @@
                             <td><a href="{{site.url}}">{{ site.url}}</a></td>
                             <td>{{site.visit_count}}</td>
                             <td>{{site.routed_data_amount|divide:1024|floatformat:2 }} KB</td>
+                            <td><button onclick='onProxyClick("{% url 'proxy' site.name|urlencode:'' site.url|urlencode:'' %}")'>Proxy</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
         {% endif %}
     </div>
 {% endblock%}
+
+
+{% block additional_tags_body %}
+    <script src="{% static 'home/js/script.js' %}"></script>
+{% endblock %}
+

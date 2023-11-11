@@ -1,4 +1,4 @@
-FROM python:3.12 as base
+FROM joyzoursky/python-chromedriver:3.9 as base
 
 # Setup env
 ENV LANG C.UTF-8

@@ -5,12 +5,15 @@ name = "pypi"
 
 [packages]
 django = "*"
-requests = "*"
 python-environ = "*"
 dj-database-url = "*"
 psycopg2 = "*"
+bs4 = "*"
+install = "*"
+selenium = "*"
+requests = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.12"
+python_version = "3.9"

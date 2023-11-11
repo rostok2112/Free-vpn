@@ -1,5 +1,8 @@
 from django import forms
-from .models import Site
+from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.models import User
+
+from app.models import Site
 
 
 class BaseForm(forms.ModelForm):
@@ -59,7 +62,7 @@ class SiteForm(BaseForm):
         return name
 
     def clean_url(self):
-        url = self.cleaned_data['url']
+        url = self.cleaned_data['url'].lower()
         if not url.startswith(('http://', 'https://')):
             raise forms.ValidationError("Invalid URL. Please include the protocol (http:// or https://).")
 
@@ -74,3 +77,32 @@ class SiteForm(BaseForm):
             if q.exists():
                 raise forms.ValidationError("Site url duplicate")
         return url
+
+class CustomUserChangeForm(UserChangeForm):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
+    password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput, required=False)
+
+    class Meta:
+        model = User
+        fields = ('email', 'first_name', 'last_name', 'password')
+
+    def clean_password2(self):
+        # Проверка совпадения паролей
+        password1 = self.cleaned_data.get("password")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data["password"]
+
+        if password:
+            user.set_password(password)
+        elif not self.cleaned_data["password2"]:
+            user.password = self.initial["password"]
+
+        if commit:
+            user.save()
+        return user

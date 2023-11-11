@@ -14,7 +14,7 @@ sudo usermod -aG docker ${USER}
 su - ${USER}
 ```
 
-Or install Docker desktop for windows: [Installation instruction](https://docs.docker.com/desktop/install/windows-install/)
+Or install Docker Desktop: [Installation instruction](https://docs.docker.com/desktop/install/windows-install/)
 
 Copy and paste values of .env.example file to .env file and edit it for your purposes:
 
@@ -66,6 +66,17 @@ Install pipenv:
 ```bash
 pip install --user pipenv
 ```
+
+Install chrome:
+```bash
+sudo apt install wget unzip gnupg
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+sduo apt update
+sudo apt install google-chrome-stable
+``` 
+
+Or install from here: [Download chrome](https://www.google.com/intl/uk_ua/chrome/) 
 
 Sync dependencies:
 
@@ -124,3 +135,9 @@ Delete all images:
 ```bash
 docker image rm $(docker image ls -q) && docker image prune -af
 ```
+
+## Testing
+
+Recomended sites for testing proxy:
+- [QA theory](https://the-internet.herokuapp.com/)
+- [duck duck go](https://duckduckgo.com/)
