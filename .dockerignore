@@ -60,6 +60,6 @@ docs/_build/
 .gitignore
 .env.example
 README.md
-.git/d
+.git/
 
 
