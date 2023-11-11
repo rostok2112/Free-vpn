@@ -7,8 +7,10 @@
         <img src="{% static 'img/logo.png' %}" class='logo-img' alt="free-vpn-logo">
         <span class='logo-text'> Free VPN </span>
     </a> 
-    <a href="{% url 'admin:index' %}"> Admin panel </a>
-    &nbsp;|&nbsp;
+    {% if request.user.is_superuser %}
+        <a href="{% url 'admin:index' %}"> Admin panel </a>
+        &nbsp;|&nbsp;
+    {% endif%}
     <a href="{% url 'settings' %}">{{request.user.username | capfirst }} settings </a>
     &nbsp;|&nbsp;
     <a href="{% url 'logout' %}"> Log out </a>

@@ -45,8 +45,8 @@ docker exec -it free_vpn python /code/manage.py  createsuperuser
 After any changes in models create and apply migrations:
 
 ```bash
-docker exec free_vpn  python manage.py makemigrations
-docker compose up -d --no-deps --build free_vpn
+docker exec free_vpn  python /code/manage.py makemigrations
+docker exec free_vpn  python /code/manage.py migrate
 ```
 
 ## Optionally(for development purposes)
