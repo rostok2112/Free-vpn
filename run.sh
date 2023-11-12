@@ -1,10 +1,7 @@
 #!/bin/sh
 
 
-set -e # fail on any error
-set -x # enable print of debug logs
-
-cd /code/
+set -ex # fail on any error and enable print of debug logs
 
 python manage.py migrate # Migrate DB
 python manage.py collectstatic --noinput # Collect static

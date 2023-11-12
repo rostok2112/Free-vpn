@@ -21,13 +21,16 @@ services:
     links:
       - "db:postgres_db"
     restart: unless-stopped
-    volumes:
-      - .:/code
     environment:
       - PORT=${PORT}
       - DATABASE_URL=${DATABASE_URL:-postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}}
       - DEBUG=${DEBUG}
       - SECRET_KEY=${SECRET_KEY}
+      - WORKING_DIR=/code
+    volumes:
+      - .:/code
+    working_dir: /code
+    
     depends_on:
       - db
 

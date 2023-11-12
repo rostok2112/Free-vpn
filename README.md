@@ -37,7 +37,7 @@ Or write in adress line `localhost:<port>/` where <port> is a value of PORT in .
 For creating super user (Account with unlimited rights on admin panel):
 
 ```bash
-docker exec -it free_vpn python /code/manage.py  createsuperuser
+docker exec -it free_vpn python manage.py  createsuperuser
 ```
 
 ## Migrations
@@ -45,8 +45,8 @@ docker exec -it free_vpn python /code/manage.py  createsuperuser
 After any changes in models create and apply migrations:
 
 ```bash
-docker exec free_vpn  python /code/manage.py makemigrations
-docker exec free_vpn  python /code/manage.py migrate
+docker exec free_vpn  python manage.py makemigrations
+docker exec free_vpn  python manage.py migrate
 ```
 
 ## Optionally(for development purposes)

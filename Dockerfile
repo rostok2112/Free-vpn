@@ -26,4 +26,4 @@ COPY --from=deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
 
 # Run the application
-ENTRYPOINT ["/code/run.sh"]
+ENTRYPOINT "${WORKING_DIR}/run.sh"
