@@ -1,12 +1,5 @@
 from urllib.parse import quote_plus
-import requests
 
-def get_resource_size(url):
-    try:
-        response = requests.get(url)
-        return len(response.content)
-    except:
-        return 0
 
 def urlencode(value, safe='~'):
     encoded_value = quote_plus(value, safe=safe)

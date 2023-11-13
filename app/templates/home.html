@@ -22,7 +22,7 @@
         {% if  not sites %}
             <span> No any site added </span>
         {% endif %}
-        <p class='add-site-link'><a href={% url 'site_add' %}>Add new site</a></p>
+            <p class='add-site-link'><a href={% url 'site_add' %}>Add new site</a></p>
         {% if sites %}
             <table>
                 <thead>
@@ -40,7 +40,7 @@
                             <td><a href="{% url 'site_edit' site.id %}">{{ site.name }}</a></td>
                             <td><a href="{{site.url}}">{{ site.url}}</a></td>
                             <td>{{site.visit_count}}</td>
-                            <td>{{site.routed_data_amount|divide:1024|floatformat:2 }} KB</td>
+                            <td>{{site.routed_data_amount|divide:1000|floatformat:2 }} KB</td>
                             <td><button onclick='onProxyClick("{% url 'proxy' site.name|urlencode:'' site.url|urlencode:'' %}")'>Proxy</button></td>
                         </tr>
                     {% endfor %}

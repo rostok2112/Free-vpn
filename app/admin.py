@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from app.models import Site
 
 @admin.register(Site)
-class SiteAdmin(BaseAdmin):
+class SiteAdmin(admin.ModelAdmin):
     list_select_related   = ('user', )
     list_links            = ('user', 'url', )
     search_fields         = ('id', 'name', 'user__username', )

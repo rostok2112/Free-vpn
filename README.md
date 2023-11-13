@@ -57,7 +57,9 @@ Install python:
 sudo apt install software-properties-common
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt update
-sudo apt install python3.12
+sudo apt install python3.9
+sudo apt install python-is-python3
+sudo apt install python3-pip
 python -m pip install --upgrade pip
 ```
 

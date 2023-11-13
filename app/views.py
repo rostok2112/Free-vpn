@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import (
@@ -21,7 +22,7 @@ from urllib.parse import unquote_plus, urlparse
 
 from app.forms import SiteForm, CustomUserChangeForm
 from app.models import Site
-from app.utils import get_resource_size, urlencode
+from app.utils import urlencode
 
 
 def home(request):
@@ -122,56 +123,59 @@ def proxy(request, name, url):
     
     try: 
         parsed_url = urlparse(unquoted_url)
-        
         host_with_protocol = '{url.scheme}://{url.netloc}'.format(url=parsed_url)
         
         chrome_options = Options()
         chrome_options.add_argument('--headless')  # run in background
+        chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+        chrome_options.add_argument('--ignore-certificate-errors')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--headless')
         chrome_options.add_argument('--start-maximized')
 
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(options=chrome_options) 
+        driver.execute_cdp_cmd('Network.enable', {})
+    
+        driver.get(unquoted_url)
+        WebDriverWait(driver, 1) \
+            .until(
+                EC.presence_of_element_located((By.TAG_NAME, 'body'))
+            ) # wait for full load of page
+            
+        performance_logs = driver.get_log('performance')
+        performance_list = [json.loads(log['message'])['message'] for log in performance_logs]
 
-        try:
-            driver.get(unquoted_url)
-            WebDriverWait(driver, 1) \
-                .until(
-                    EC.presence_of_element_located((By.TAG_NAME, 'body'))
-                ) # wait for full load of page
-            
-
-            html_content = driver.page_source
-            total_traffic = len(html_content.encode('utf-8'))
-            
-            soup = BeautifulSoup(html_content, 'html.parser')
-            
-            for tag in soup.find_all(['link', 'script', 'meta', 'img']):
-                for tag_attr in ['src', 'href', 'content', 'data-src',]:
-                    if tag_attr in tag.attrs and  tag.get(tag_attr).startswith('/'):
-                        tag[tag_attr] = f"{host_with_protocol}{tag.get(tag_attr)}"
-                        total_traffic += get_resource_size(tag[tag_attr])
-                if tag.get('srcset'):
-                    tags_contents = []
-                    for tag_content in tag['srcset'].split(' '):
-                        if tag_content.startswith('/'):
-                            tag_content = f"{host_with_protocol}{tag_content}"
-                        tags_contents.append(tag_content)
-                    tag['srcset'] = " ".join(tags_contents)
-            
-            for a in soup.find_all('a'):
-                if a.get('href', '').startswith('/'):
-                    a['href'] = f'/{name}/{urlencode(unquoted_url + a["href"])}'
+        total_traffic = sum( 
+            float(log["params"]["response"]["headers"].get("Content-Length", 0.0))
+            for log in performance_list
+            if log["method"] == "Network.responseReceived"
+        )
+        
+        html_content = driver.page_source
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        for tag in soup.find_all(['link', 'script', 'meta', 'img']):
+            for tag_attr in ['src', 'href', 'content', 'data-src',]:
+                if tag_attr in tag.attrs and  tag.get(tag_attr).startswith('/'):
+                    tag[tag_attr] = f"{host_with_protocol}{tag.get(tag_attr)}"
+            if tag.get('srcset'):
+                tags_contents = []
+                for tag_content in tag['srcset'].split(' '):
+                    if tag_content.startswith('/'):
+                        tag_content = f"{host_with_protocol}{tag_content}"
+                    tags_contents.append(tag_content)
+                tag['srcset'] = " ".join(tags_contents)
+        
+        for a in soup.find_all('a'):
+            if a.get('href', '').startswith('/'):
+                a['href'] = f'/{name}/{urlencode(unquoted_url + a["href"])}'
                 
-        finally:
-            driver.quit()
             
         html_content = str(soup)
         
         site = Site.objects.get(name=unquoted_name)
-        site.visit_count += 1 
+        site.visit_count += 1
         site.routed_data_amount += total_traffic
         site.save()
         
@@ -183,6 +187,8 @@ def proxy(request, name, url):
         messages.error(request, message)
          
         return redirect('home')
+    finally:
+        driver.quit()
         
 @login_required
 def settings(request):
