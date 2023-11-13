@@ -126,16 +126,22 @@ def proxy(request, name, url):
         host_with_protocol = '{url.scheme}://{url.netloc}'.format(url=parsed_url)
         
         chrome_options = Options()
-        chrome_options.add_argument('--headless')  # run in background
-        chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+        
+        chrome_options.set_capability( 
+            'goog:loggingPrefs',       # for getting performance and network  
+            {'performance': 'ALL'}     # chrome devtools protocol logs
+        ) 
+        
+        chrome_options.add_argument('--headless')  # run in background                                                                     
         chrome_options.add_argument('--ignore-certificate-errors')
+        # for running in docker container
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--start-maximized')
 
         driver = webdriver.Chrome(options=chrome_options) 
-        driver.execute_cdp_cmd('Network.enable', {})
+        driver.execute_cdp_cmd('Network.enable', {}) # allow CDP network logs
     
         driver.get(unquoted_url)
         WebDriverWait(driver, 1) \
@@ -144,13 +150,16 @@ def proxy(request, name, url):
             ) # wait for full load of page
             
         performance_logs = driver.get_log('performance')
-        performance_list = [json.loads(log['message'])['message'] for log in performance_logs]
+        performance_list = [
+            json.loads(log['message'])['message'] 
+            for log in performance_logs
+        ]
 
-        total_traffic = sum( 
+        total_traffic = sum([
             float(log["params"]["response"]["headers"].get("Content-Length", 0.0))
             for log in performance_list
             if log["method"] == "Network.responseReceived"
-        )
+        ])
         
         html_content = driver.page_source
         soup = BeautifulSoup(html_content, 'html.parser')
@@ -170,8 +179,7 @@ def proxy(request, name, url):
         for a in soup.find_all('a'):
             if a.get('href', '').startswith('/'):
                 a['href'] = f'/{name}/{urlencode(unquoted_url + a["href"])}'
-                
-            
+ 
         html_content = str(soup)
         
         site = Site.objects.get(name=unquoted_name)

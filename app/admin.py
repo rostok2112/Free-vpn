@@ -30,8 +30,12 @@ class SiteAdmin(admin.ModelAdmin):
     def get_other_fields(self):
         if not getattr(self, '_PK_NAME', None):
             self._PK_NAME = self.get_primary_key_name()
-        return [field.name for field in Site._meta.fields
-                if field.name not in self.list_links and field.name != self._PK_NAME]
+        return [
+            field.name 
+            for field in Site._meta.fields   
+            if field.name not in self.list_links 
+            and field.name != self._PK_NAME
+        ]
     
     def get_readonly_fields(self, request, obj=None):
         if obj:  
