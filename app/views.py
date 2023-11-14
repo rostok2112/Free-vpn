@@ -99,6 +99,7 @@ class SettingsView(CustomLoginRequiredMixin, FormView):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.request.user
         return kwargs
+
 class SiteAddView(CustomLoginRequiredMixin, FormView):
     template_name = 'site_form.html'
     form_class = SiteForm
@@ -141,6 +142,7 @@ class SiteDeleteView(CustomLoginRequiredMixin, View):
         site.delete()
         messages.success(request, f"You have successfully deleted site '{site.name}' !")
         return redirect('home')
+
 class ProxyView(CustomLoginRequiredMixin, View):
     def get(self, request, name, url):
         unquoted_name = unquote_plus(name)
