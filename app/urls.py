@@ -1,21 +1,19 @@
 from django.urls import path
-from django.contrib import admin
 
 from app import views
 
 
 urlpatterns = [
-    path("", views.home, name="home"),
-    path("settings", views.settings, name="settings"),
-
-    path("login", views.login, name="login"),
-    path("register", views.register, name="register"),
-    path("logout", views.logout, name="logout"),
+    path("settings", views.SettingsView.as_view(), name="settings"),
+    path("login", views.CustomLoginView.as_view(), name="login"),
+    path("register", views.CustomRegisterView.as_view(), name="register"),
+    path("logout", views.CustomLogoutView.as_view(), name="logout"),
     
-    path("sites/", views.site_add, name='site_add'),
-    path("sites/<uuid:id>/", views.site_edit, name='site_edit'),
-    path('sites/<uuid:id>/delete/', views.site_delete, name='site_delete'),
+    path("", views.HomeView.as_view(), name="home"),
+    path("sites/", views.SiteAddView.as_view(), name='site_add'),
+    path("sites/<uuid:id>/", views.SiteEditView.as_view(), name='site_edit'),
+    path('sites/<uuid:id>/delete/', views.SiteDeleteView.as_view(), name='site_delete'),
     
-    path('<str:name>/<str:url>/', views.proxy, name='proxy'),
-    path('static_proxy/<str:name>/<str:url>/', views.static_proxy, name='static_proxy'),
+    path('<str:name>/<str:url>/', views.ProxyView.as_view(), name='proxy'),
+    path('static_proxy/<str:name>/<str:url>/', views.StaticProxyView.as_view(), name='static_proxy'),
 ]
