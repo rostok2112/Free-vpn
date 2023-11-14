@@ -142,4 +142,3 @@ docker image rm $(docker image ls -q) && docker image prune -af
 
 Recomended sites for testing proxy:
 - [QA theory](https://the-internet.herokuapp.com/)
-- [duck duck go](https://duckduckgo.com/)

@@ -17,4 +17,5 @@ urlpatterns = [
     path('sites/<uuid:id>/delete/', views.site_delete, name='site_delete'),
     
     path('<str:name>/<str:url>/', views.proxy, name='proxy'),
+    path('static_proxy/<str:name>/<str:url>/', views.static_proxy, name='static_proxy'),
 ]

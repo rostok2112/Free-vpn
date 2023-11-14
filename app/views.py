@@ -1,6 +1,7 @@
 import json
+import re
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.contrib.auth import (
     authenticate, 
     login as login_,
@@ -10,6 +11,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+import requests
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -121,16 +123,8 @@ def proxy(request, name, url):
     unquoted_name = unquote_plus(name)
     unquoted_url = unquote_plus(url).removesuffix('/')
     
-    try: 
-        parsed_url = urlparse(unquoted_url)
-        host_with_protocol = '{url.scheme}://{url.netloc}'.format(url=parsed_url)
-        
+    try:
         chrome_options = Options()
-        
-        chrome_options.set_capability( 
-            'goog:loggingPrefs',       # for getting performance and network  
-            {'performance': 'ALL'}     # chrome devtools protocol logs
-        ) 
         
         chrome_options.add_argument('--headless')  # run in background                                                                     
         chrome_options.add_argument('--ignore-certificate-errors')
@@ -139,65 +133,107 @@ def proxy(request, name, url):
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--start-maximized')
+        chrome_options.set_capability( 
+            'goog:loggingPrefs',       # for getting performance and network  
+            {'performance': 'ALL'}     # chrome devtools protocol logs
+        ) 
 
         driver = webdriver.Chrome(options=chrome_options) 
-        driver.execute_cdp_cmd('Network.enable', {}) # allow CDP network logs
-    
-        driver.get(unquoted_url)
-        WebDriverWait(driver, 1) \
-            .until(
-                EC.presence_of_element_located((By.TAG_NAME, 'body'))
-            ) # wait for full load of page
+        try: 
+            site = Site.objects.get(name=unquoted_name)
+            site_url = site.url.removesuffix('/')
+            parsed_site_url = urlparse(site_url)
+            host = parsed_site_url.netloc
+            host_with_protocol = '{url.scheme}://{url.netloc}'.format(url=parsed_site_url)
             
-        performance_logs = driver.get_log('performance')
-        performance_list = [
-            json.loads(log['message'])['message'] 
-            for log in performance_logs
-        ]
+            driver.execute_cdp_cmd('Network.enable', {}) # allow CDP network logs
+            driver.get(unquoted_url)
+            WebDriverWait(driver, 10) \
+                .until(
+                    EC.presence_of_element_located((By.TAG_NAME, 'link'))
+                ) # wait for full load of page
+               
+            performance_logs = driver.get_log('performance')
+            performance_list = [
+                json.loads(log['message'].lower())['message']
+                for log in performance_logs
+            ]
+            
+            total_traffic = sum([
+                int(log["params"]["response"]["headers"].get("content-length", 0))
+                for log in performance_list
+                if log["method"] == "network.responsereceived"
+            ])
+            
+            html_content = driver.page_source
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            for tag in soup.find_all(['a', 'script', 'link', 'meta', 'img',]):
+                new_path_chunk = f'/{name}/'
+                if tag.name != 'a':
+                    new_path_chunk = '/static_proxy' + new_path_chunk
+                for tag_attr in ['href', 'src', 'content', 'data-src',]:
+                    if tag_attr in tag.attrs:
+                        old_tag_attr_val = tag.get(tag_attr, '')
+                        if old_tag_attr_val.startswith('/'):
+                            tag[tag_attr] = new_path_chunk + urlencode(host_with_protocol + old_tag_attr_val)
+                        elif host in old_tag_attr_val:
+                            tag[tag_attr] = new_path_chunk + urlencode(old_tag_attr_val)
 
-        total_traffic = sum([
-            float(log["params"]["response"]["headers"].get("Content-Length", 0.0))
-            for log in performance_list
-            if log["method"] == "Network.responseReceived"
-        ])
-        
-        html_content = driver.page_source
-        soup = BeautifulSoup(html_content, 'html.parser')
-        
-        for tag in soup.find_all(['link', 'script', 'meta', 'img']):
-            for tag_attr in ['src', 'href', 'content', 'data-src',]:
-                if tag_attr in tag.attrs and  tag.get(tag_attr).startswith('/'):
-                    tag[tag_attr] = f"{host_with_protocol}{tag.get(tag_attr)}"
-            if tag.get('srcset'):
-                tags_contents = []
-                for tag_content in tag['srcset'].split(' '):
-                    if tag_content.startswith('/'):
-                        tag_content = f"{host_with_protocol}{tag_content}"
-                    tags_contents.append(tag_content)
-                tag['srcset'] = " ".join(tags_contents)
-        
-        for a in soup.find_all('a'):
-            if a.get('href', '').startswith('/'):
-                a['href'] = f'/{name}/{urlencode(unquoted_url + a["href"])}'
- 
-        html_content = str(soup)
-        
-        site = Site.objects.get(name=unquoted_name)
-        site.visit_count += 1
-        site.routed_data_amount += total_traffic
-        site.save()
-        
-        return HttpResponse(html_content)
+                if tag.get('srcset'):
+                    tags_attr_chunks = []
+                    new_path_chunk = f'/static_proxy/{name}/'
+                    for tag_attr_chunk_val in tag['srcset'].split(' '):
+                        if tag_attr_chunk_val.startswith('/'):
+                            tag_attr_chunk_val = new_path_chunk + urlencode(f"{host_with_protocol}{tag_attr_chunk_val}")
+                        elif host in tag_attr_chunk_val:
+                            tag_attr_chunk_val = new_path_chunk + urlencode(tag_attr_chunk_val)
+                        tags_attr_chunks.append(tag_attr_chunk_val)
+                    tag['srcset'] = " ".join(tags_attr_chunks)
+                    
+            html_content = str(soup)
+            
+            if site_url == unquoted_url:
+                site.visit_count += 1
+                site.routed_data_amount += total_traffic
+                site.save()
+            
+            return HttpResponse(html_content)
+        except Exception as e:
+            raise e
+        finally:
+            driver.quit()
     except Exception as e:
         message = f"Cant load '{unquoted_name}'  site " \
-                        f"with '{unquoted_url}' url. "  \
-                        "Make sure that url is correct."
+                            f"with '{unquoted_url}' url. "  \
+                            "Make sure that url is correct."
         messages.error(request, message)
-         
         return redirect('home')
-    finally:
-        driver.quit()
+
+@login_required
+def static_proxy(request, name, url):
+    unquoted_url = unquote_plus(url).removesuffix('/')
+    
+    try: 
+        response = requests.get(unquoted_url)
+        content_type = response.headers.get('content-type')
         
+        if content_type.startswith('text/css'):
+            content = response.text
+            
+            url_pattern = re.compile(r'url\((.*?)\)')
+            matches = url_pattern.findall(content)
+            for old_url in matches:
+                old_relative_path = urlparse(old_url).path
+                new_url = f'/static_proxy/{name}/{urlencode(old_relative_path)}'
+                
+                content = content.replace(f'url({old_url})', f'url({new_url})')
+        else:
+             content = response.content  
+        return HttpResponse(content, content_type=content_type)
+    except requests.exceptions.RequestException:
+        raise Http404('Resource not found')
+    
 @login_required
 def settings(request):
     if request.method == 'POST':
